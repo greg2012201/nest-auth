@@ -18,7 +18,7 @@ export class UserRepository {
   }
   async findUserByEmail(email: string) {
     const foundUsers = await this.db
-      .select({ id: schema.users.email })
+      .select({ id: schema.users.id })
       .from(schema.users)
       .where(sql`${schema.users.email} = ${email}`)
       .limit(1);
@@ -30,6 +30,9 @@ export class UserRepository {
     return this.db.select().from(schema.users);
   }
   async createUser({ email, name }: { email: string; name: string }) {
-    await this.db.insert(schema.users).values({ email, name });
+    return this.db
+      .insert(schema.users)
+      .values({ email, name })
+      .returning({ id: schema.users.id })[0];
   }
 }
