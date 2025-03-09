@@ -16,4 +16,20 @@ export class UserRepository {
       .from(schema.users)
       .where(sql`${schema.users.id} = ${id}`);
   }
+  async findUserByEmail(email: string) {
+    const foundUsers = await this.db
+      .select({ id: schema.users.email })
+      .from(schema.users)
+      .where(sql`${schema.users.email} = ${email}`)
+      .limit(1);
+
+    return foundUsers[0];
+  }
+
+  async getAllUsers() {
+    return this.db.select().from(schema.users);
+  }
+  async createUser({ email, name }: { email: string; name: string }) {
+    await this.db.insert(schema.users).values({ email, name });
+  }
 }
