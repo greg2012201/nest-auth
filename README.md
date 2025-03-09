@@ -27,4 +27,4 @@ JWT_SECRET=<your-jwt-secret>
 
 ## License
 
-This project is [MIT licensed](LICENSE).
+This project is [MIT licensed](LICENSE.md).
