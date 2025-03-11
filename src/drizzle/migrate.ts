@@ -1,5 +1,4 @@
 import * as dotenv from 'dotenv';
-import { eq } from 'drizzle-orm';
 import { type NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import path from 'path';
