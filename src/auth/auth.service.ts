@@ -7,7 +7,12 @@ import { UserRepository } from 'src/user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
-type AuthDTO = { email: string; firstName: string; lastName: string };
+type AuthDTO = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+};
 
 @Injectable()
 export class AuthService {
@@ -29,15 +34,15 @@ export class AuthService {
       throw new BadRequestException('Invalid credentials');
     }
 
-    const existingDbUser = await this.userRepository.findUserByEmail(
-      user?.email || '',
+    const existingDbUser = await this.userRepository.findUserByGoogleId(
+      user.id || '', // in our db id that comes from google is is stored as google_id
     );
     if (existingDbUser) {
       return this.createAccessToken(existingDbUser.id);
     }
 
     const newUser = await this.createNewUser(user);
-
+    console.log('newUser', newUser);
     if (!newUser) {
       throw new InternalServerErrorException('Could not create a user');
     }
@@ -47,6 +52,7 @@ export class AuthService {
 
   async createNewUser(user: AuthDTO) {
     return this.userRepository.createUser({
+      id: user.id,
       email: user.email,
       name: `${user.firstName} ${user.lastName}`,
     });

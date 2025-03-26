@@ -16,11 +16,11 @@ export class UserRepository {
       .from(schema.users)
       .where(sql`${schema.users.id} = ${id}`);
   }
-  async findUserByEmail(email: string) {
+  async findUserByGoogleId(googleId: string) {
     const foundUsers = await this.db
       .select({ id: schema.users.id })
       .from(schema.users)
-      .where(sql`${schema.users.email} = ${email}`)
+      .where(sql`${schema.users.googleId} = ${googleId}`)
       .limit(1);
 
     return foundUsers[0];
@@ -29,10 +29,19 @@ export class UserRepository {
   async getAllUsers() {
     return this.db.select().from(schema.users);
   }
-  async createUser({ email, name }: { email: string; name: string }) {
-    return this.db
+  async createUser({
+    id: googleId,
+    email,
+    name,
+  }: {
+    id: string;
+    email: string;
+    name: string;
+  }) {
+    const result = await this.db
       .insert(schema.users)
-      .values({ email, name })
-      .returning({ id: schema.users.id })[0];
+      .values({ email, name, googleId })
+      .returning({ id: schema.users.id });
+    return result[0];
   }
 }

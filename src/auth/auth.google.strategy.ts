@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 
 type GoogleProfile = {
+  id: string;
   name: {
     givenName: string;
     familyName: string;
@@ -31,8 +32,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (!profile) {
       throw new UnauthorizedException('Invalid profile');
     }
-    const { name, emails } = profile;
+    const { id, name, emails } = profile;
     const user = {
+      id,
       email: emails[0].value,
       firstName: name.givenName,
       lastName: name.familyName,
