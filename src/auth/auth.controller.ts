@@ -18,4 +18,10 @@ export class AuthController {
     res.cookie('access_token', token, { httpOnly: true });
     return res.redirect('/users');
   }
+
+  @Get('logout')
+  async logout(@Res() res: Response) {
+    res.clearCookie('access_token');
+    return res.redirect('/');
+  }
 }
