@@ -7,12 +7,17 @@ import { UserModule } from 'src/user/user.module';
 import { JwtStrategy } from './auth.jwt.strategy';
 import { JwtAuthGuard } from './auth.jwt-guard';
 import { JwtModule } from '@nestjs/jwt';
+import { DropboxGuard } from './auth.dropbox-guard';
+import { PassportModule } from '@nestjs/passport';
+import { DropboxStrategy } from './auth.dropbox.strategy';
 
 @Module({
   providers: [
     AuthService,
     GoogleStrategy,
     GoogleGuard,
+    DropboxGuard,
+    DropboxStrategy,
     JwtStrategy,
     JwtAuthGuard,
   ],
