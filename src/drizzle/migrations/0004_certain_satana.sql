@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "is_connected_to_dropbox" boolean DEFAULT false;

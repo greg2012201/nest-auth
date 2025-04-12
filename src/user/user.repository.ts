@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleProvider } from 'src/drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, exists, is } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from 'src/encryption/encryption.service';
 
@@ -33,7 +33,14 @@ export class UserRepository {
   }
 
   async getAllUsers() {
-    return this.db.select().from(schema.users);
+    return this.db
+      .select({
+        id: schema.users.id,
+        name: schema.users.name,
+        email: schema.users.email,
+        isConnectedToDropbox: schema.users.isConnectedToDropbox,
+      })
+      .from(schema.users);
   }
   async createUser({
     id: googleId,
@@ -64,23 +71,39 @@ export class UserRepository {
   }) {
     const encryptedAccessToken = this.encryptionService.encrypt(accessToken);
     const encryptedRefreshToken = this.encryptionService.encrypt(refreshToken);
-    const [dropboxAccount] = await this.db
-      .insert(schema.dropboxAccounts)
-      .values({
-        dropboxId,
-        userId,
-        accessToken: encryptedAccessToken,
-        refreshToken: encryptedRefreshToken,
-      })
-      .returning({ id: schema.dropboxAccounts.id });
 
-    const result = await this.db
-      .insert(schema.usersToDropboxAccounts)
-      .values({
-        userId: userId,
-        dropboxAccountId: dropboxAccount.id,
-      })
-      .returning({ id: schema.usersToDropboxAccounts.userId });
-    return result[0];
+    let result: { id: schema.User['id'] }[] | null = null;
+    await this.db.transaction(async (tx) => {
+      const [dropboxAccount] = await tx
+        .insert(schema.dropboxAccounts)
+        .values({
+          dropboxId,
+          userId,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+        })
+        .onConflictDoUpdate({
+          target: schema.dropboxAccounts.dropboxId,
+          set: {
+            accessToken: encryptedAccessToken,
+            refreshToken: encryptedRefreshToken,
+          },
+        })
+        .returning({ id: schema.dropboxAccounts.id });
+      result = await tx
+        .insert(schema.usersToDropboxAccounts)
+        .values({
+          userId: userId,
+          dropboxAccountId: dropboxAccount.id,
+        })
+        .onConflictDoNothing()
+        .returning({ id: schema.usersToDropboxAccounts.userId });
+
+      await tx
+        .update(schema.users)
+        .set({ isConnectedToDropbox: true })
+        .where(eq(schema.users.id, userId));
+    });
+    return result?.[0];
   }
 }
