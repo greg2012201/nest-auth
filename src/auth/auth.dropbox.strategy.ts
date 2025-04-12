@@ -8,7 +8,7 @@ type DropboxProfile = {
   emails?: Array<{ value: string }>;
 };
 
-type DropboxUser = {
+export type DropboxUser = {
   dropboxId: string;
   email: string | undefined;
   accessToken: string;
