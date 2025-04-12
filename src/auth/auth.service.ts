@@ -72,6 +72,4 @@ export class AuthService {
 
     return connectedUser;
   }
-
-  async refreshDropboxToken() {}
 }
