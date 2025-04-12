@@ -6,13 +6,7 @@ import {
 import { UserRepository } from 'src/user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-
-type AuthDTO = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-};
+import { AuthDTO, connectDropboxDTOSchema } from './auth.schema';
 
 @Injectable()
 export class AuthService {
@@ -42,7 +36,6 @@ export class AuthService {
     }
 
     const newUser = await this.createNewUser(user);
-    console.log('newUser', newUser);
     if (!newUser) {
       throw new InternalServerErrorException('Could not create a user');
     }
@@ -57,4 +50,29 @@ export class AuthService {
       name: `${user.firstName} ${user.lastName}`,
     });
   }
+
+  async connectDropboxAccount(maybeUserDto: unknown) {
+    console.log('maybeUserDto', maybeUserDto);
+    const userDto = connectDropboxDTOSchema.safeParse(maybeUserDto);
+    if (!userDto.success) {
+      throw new BadRequestException('Invalid Dropbox user data');
+    }
+    const { userId, dropboxId, accessToken, refreshToken } = userDto.data;
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    const connectedUser = await this.userRepository.connectDropboxAccount({
+      userId: user.id,
+      dropboxId,
+      accessToken,
+      refreshToken,
+    });
+
+    return connectedUser;
+  }
+
+  async refreshDropboxToken() {}
 }

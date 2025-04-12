@@ -18,7 +18,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res: Response) {
-    const user = this.userRepository.findUserById(id);
+    const user = this.userRepository.findUserById(parseInt(id));
     return res.json(user);
   }
 }
