@@ -52,7 +52,6 @@ export class AuthService {
   }
 
   async connectDropboxAccount(maybeUserDto: unknown) {
-    console.log('maybeUserDto', maybeUserDto);
     const userDto = connectDropboxDTOSchema.safeParse(maybeUserDto);
     if (!userDto.success) {
       throw new BadRequestException('Invalid Dropbox user data');
