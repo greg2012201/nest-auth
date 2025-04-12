@@ -20,7 +20,6 @@ export class UserRepository {
       .from(schema.users)
       .where(eq(schema.users.id, id))
       .limit(1);
-    console.log('results', results);
     return results[0];
   }
   async findUserByGoogleId(googleId: string) {
