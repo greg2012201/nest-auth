@@ -8,6 +8,27 @@
       "when": 1742332317908,
       "tag": "0000_organic_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1744152318698,
+      "tag": "0001_early_swarm",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1744492825496,
+      "tag": "0002_nervous_gorgon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1744492881220,
+      "tag": "0003_nostalgic_ikaris",
+      "breakpoints": true
     }
   ]
 }
