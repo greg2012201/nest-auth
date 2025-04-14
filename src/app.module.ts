@@ -4,6 +4,8 @@ import { DrizzleModule } from './drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     UserModule,
     EncryptionModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
