@@ -78,7 +78,6 @@ export class UserRepository {
         .insert(schema.dropboxAccounts)
         .values({
           dropboxId,
-          userId,
           accessToken: encryptedAccessToken,
           refreshToken: encryptedRefreshToken,
         })

@@ -1,0 +1,1 @@
+ALTER TABLE "dropbox_accounts" DROP COLUMN "user_id";

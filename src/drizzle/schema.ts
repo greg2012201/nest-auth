@@ -18,7 +18,6 @@ export const users = pgTable('users', {
 
 export const dropboxAccounts = pgTable('dropbox_accounts', {
   id: serial('id').primaryKey(),
-  userId: serial('user_id').notNull(),
   dropboxId: varchar('dropbox_id', { length: 255 }).notNull().unique(),
   accessToken: varchar('access_token', { length: 4000 }).notNull(),
   refreshToken: varchar('refresh_token', { length: 4000 }).notNull(),
