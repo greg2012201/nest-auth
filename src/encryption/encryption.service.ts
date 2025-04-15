@@ -11,6 +11,10 @@ export class EncryptionService {
       this.configService.get<string>('ENCRYPTION_KEY')!,
       'hex',
     );
+
+    if (this.ENCRYPTION_KEY.length !== 32) {
+      throw new Error('Invalid ENCRYPTION_KEY length. Must be 32 bytes.');
+    }
   }
 
   encrypt(text: string): string {
@@ -21,30 +25,39 @@ export class EncryptionService {
       iv,
     );
 
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
 
     const authTag = cipher.getAuthTag();
 
-    return `${iv.toString('hex')}:${encrypted}:${authTag.toString('hex')}`;
+    return [iv.toString('base64'), encrypted, authTag.toString('base64')].join(
+      ':',
+    );
   }
 
   decrypt(encryptedData: string): string {
-    const [ivHex, encrypted, authTagHex] = encryptedData.split(':');
+    try {
+      const [ivB64, encrypted, authTagB64] = encryptedData.split(':');
+      if (!ivB64 || !encrypted || !authTagB64) {
+        throw new Error('Invalid encrypted data format');
+      }
 
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
+      const iv = Buffer.from(ivB64, 'base64');
+      const authTag = Buffer.from(authTagB64, 'base64');
 
-    const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
-      this.ENCRYPTION_KEY,
-      iv,
-    );
-    decipher.setAuthTag(authTag);
+      const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        this.ENCRYPTION_KEY,
+        iv,
+      );
+      decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+      let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+      decrypted += decipher.final('utf8');
 
-    return decrypted;
+      return decrypted;
+    } catch (err) {
+      throw new Error('Failed to decrypt token: ' + err.message);
+    }
   }
 }
