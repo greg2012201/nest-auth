@@ -31,7 +31,6 @@ export class DropboxStrategy extends PassportStrategy(
     });
   }
   authorizationParams(req: any): Record<string, string> {
-    console.log('req in strategy', req);
     return {
       response_type: 'code',
       token_access_type: 'offline',
