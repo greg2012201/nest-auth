@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-dropbox-oauth2';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from './auth.service';
 
 type DropboxProfile = {
   id: string;
@@ -21,7 +22,10 @@ export class DropboxStrategy extends PassportStrategy(
   Strategy,
   'dropbox-oauth2',
 ) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private authService: AuthService,
+  ) {
     super({
       apiVersion: '2',
       clientID: configService.get<string>('DROPBOX_APP_KEY'),
@@ -31,10 +35,11 @@ export class DropboxStrategy extends PassportStrategy(
     });
   }
   authorizationParams(req: any): Record<string, string> {
+    const state = this.authService.createStateToken(req.state);
     return {
       response_type: 'code',
       token_access_type: 'offline',
-      state: req.state,
+      state,
     };
   }
 
@@ -45,12 +50,16 @@ export class DropboxStrategy extends PassportStrategy(
     profile: DropboxProfile,
     done: VerifyCallback,
   ): Promise<void> {
+    const { sub: userId } = this.authService.validateStateToken(
+      req.query?.state ?? '',
+    );
+
     const user: DropboxUser = {
       dropboxId: profile.id,
       email: profile?.emails?.[0]?.value,
       accessToken,
       refreshToken,
-      userId: parseInt(req.query?.state ?? '0') || 0,
+      userId: parseInt(userId) || 0,
     };
 
     done(null, user);

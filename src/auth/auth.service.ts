@@ -22,7 +22,25 @@ export class AuthService {
       { secret: this.configService.get('JWT_SECRET') },
     );
   }
-
+  createStateToken(userId: number) {
+    return this.jwtService.sign(
+      { sub: userId },
+      {
+        secret: this.configService.get('STATE_JWT_SECRET'),
+        expiresIn: '5min',
+      },
+    );
+  }
+  validateStateToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('STATE_JWT_SECRET'),
+      });
+      return payload;
+    } catch (error) {
+      throw new BadRequestException('Invalid state token');
+    }
+  }
   async signIn(user: AuthDTO) {
     if (!user) {
       throw new BadRequestException('Invalid credentials');
