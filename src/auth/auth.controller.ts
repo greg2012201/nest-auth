@@ -26,6 +26,12 @@ export class AuthController {
     return res.redirect('/users');
   }
 
+  @Get('logout')
+  async logout(@Res() res: Response) {
+    res.clearCookie('access_token');
+    return res.redirect('/');
+  }
+
   @Get('dropbox')
   @UseGuards(JwtAuthGuard, DropboxGuard)
   async connectDropbox() {}
@@ -35,11 +41,5 @@ export class AuthController {
   async dropboxCallback(@Req() req: DropboxRequest, @Res() res: Response) {
     await this.authService.connectDropboxAccount(req.user);
     res.redirect('/users');
-  }
-
-  @Get('logout')
-  async logout(@Res() res: Response) {
-    res.clearCookie('access_token');
-    return res.redirect('/');
   }
 }
