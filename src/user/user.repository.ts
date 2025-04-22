@@ -2,32 +2,42 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleProvider } from 'src/drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
-import { sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserRepository {
   constructor(
     @Inject(DrizzleProvider) private db: NodePgDatabase<typeof schema>,
+    private configService: ConfigService,
   ) {}
 
-  async findUserById(id: string) {
-    return this.db
+  async findUserById(id: number) {
+    const results = await this.db
       .select({ id: schema.users.id })
       .from(schema.users)
-      .where(sql`${schema.users.id} = ${id}`);
+      .where(eq(schema.users.id, id))
+      .limit(1);
+    return results[0];
   }
   async findUserByGoogleId(googleId: string) {
     const foundUsers = await this.db
       .select({ id: schema.users.id })
       .from(schema.users)
-      .where(sql`${schema.users.googleId} = ${googleId}`)
+      .where(eq(schema.users.googleId, googleId))
       .limit(1);
 
     return foundUsers[0];
   }
 
   async getAllUsers() {
-    return this.db.select().from(schema.users);
+    return this.db
+      .select({
+        id: schema.users.id,
+        name: schema.users.name,
+        email: schema.users.email,
+      })
+      .from(schema.users);
   }
   async createUser({
     id: googleId,
