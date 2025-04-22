@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleProvider } from 'src/drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
-import { eq, exists, is } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from 'src/encryption/encryption.service';
 
